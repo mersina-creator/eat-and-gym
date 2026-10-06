@@ -60,23 +60,44 @@ export function WeightCard() {
     }
   };
 
-  // График: точки замеров и линия тренда в одном SVG. Шкала по фактическому разбросу
-  // с запасом в 0,5 кг — иначе при ровном весе линия вжимается в край.
+  // График: сетка, подписи шкалы в килограммах, точки замеров и линия тренда.
+  // Шаг сетки подбирается под разброс: при ровном весе линии через 0,5 кг, при большом — через 5.
   const chart = useMemo(() => {
     const pts = view?.points ?? [];
     const vals = pts.flatMap((p) => [p.weight, p.trend]).filter((v): v is number => !!v);
     if (vals.length < 2) return null;
-    const lo = Math.min(...vals) - 0.5;
-    const hi = Math.max(...vals) + 0.5;
+
+    const span = Math.max(...vals) - Math.min(...vals);
+    const step = [0.5, 1, 2, 5, 10].find((s) => span / s <= 4) ?? 20;
+    const lo = Math.floor((Math.min(...vals) - step / 2) / step) * step;
+    const hi = Math.ceil((Math.max(...vals) + step / 2) / step) * step;
+
     const W = 320;
-    const H = 90;
-    const x = (i: number) => (pts.length < 2 ? W / 2 : (i / (pts.length - 1)) * (W - 8) + 4);
-    const y = (v: number) => H - 6 - ((v - lo) / (hi - lo || 1)) * (H - 16);
+    const H = 96;
+    const padR = 34;
+    const padB = 14;
+    const x = (i: number) => (pts.length < 2 ? 0 : (i / (pts.length - 1)) * (W - padR - 6) + 3);
+    const y = (v: number) => (H - padB) - ((v - lo) / (hi - lo || 1)) * (H - padB - 8) - 4;
+
+    const ticks: number[] = [];
+    for (let v = lo; v <= hi + 1e-9; v += step) ticks.push(Number(v.toFixed(1)));
+
     const line = pts
       .map((p, i) => (p.trend ? `${i === 0 || !pts[i - 1].trend ? "M" : "L"}${x(i).toFixed(1)} ${y(p.trend).toFixed(1)}` : ""))
       .join("");
-    const dots = pts.map((p, i) => (p.weight ? { cx: x(i), cy: y(p.weight), key: p.date } : null)).filter(Boolean);
-    return { W, H, line, dots: dots as { cx: number; cy: number; key: string }[], lo, hi };
+    const dots = pts
+      .map((p, i) => (p.weight ? { cx: x(i), cy: y(p.weight), key: p.date } : null))
+      .filter((d): d is { cx: number; cy: number; key: string } => !!d);
+
+    const label = (iso: string) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}`;
+    const days = pts.length
+      ? [
+          { at: x(0), text: label(pts[0].date), anchor: "start" as const },
+          { at: x(pts.length - 1), text: label(pts[pts.length - 1].date), anchor: "end" as const },
+        ]
+      : [];
+
+    return { W, H, padR, padB, line, dots, ticks, y, days };
   }, [view]);
 
   const rate = view?.ratePerWeek;
@@ -94,23 +115,35 @@ export function WeightCard() {
 
       {chart && (
         <div className="weight__chart">
-          <svg viewBox={`0 0 ${chart.W} ${chart.H}`} role="img" aria-label="График веса с линией тренда">
+          <svg viewBox={`0 0 ${chart.W} ${chart.H}`} role="img" aria-label="График веса с линией тренда, килограммы">
+            {chart.ticks.map((t) => (
+              <g key={t}>
+                <line x1="0" x2={chart.W - chart.padR} y1={chart.y(t)} y2={chart.y(t)} className="weight__grid" />
+                <text x={chart.W - chart.padR + 5} y={chart.y(t) + 3.5} className="weight__tick">
+                  {t}
+                </text>
+              </g>
+            ))}
             <path d={chart.line} fill="none" stroke="currentColor" strokeWidth="2" className="weight__trend" />
             {chart.dots.map((d) => (
               <circle key={d.key} cx={d.cx} cy={d.cy} r="2.5" className="weight__dot" />
             ))}
+            {chart.days.map((d) => (
+              <text key={d.text} x={d.at} y={chart.H - 3} textAnchor={d.anchor} className="weight__tick">
+                {d.text}
+              </text>
+            ))}
+            <text x={chart.W - 2} y={9} textAnchor="end" className="weight__unit">
+              кг
+            </text>
           </svg>
-          <div className="weight__scale">
-            <span>{chart.hi.toFixed(1)}</span>
-            <span>{chart.lo.toFixed(1)}</span>
-          </div>
         </div>
       )}
 
-      {rate !== undefined && rate !== null && (
+      {!!rate && (
         <p className="weight__rate">
-          {rate > 0 ? "+" : ""}
-          {rate} кг в неделю по тренду
+          {rate > 0 ? "+" : "−"}
+          {Math.abs(rate)} кг в неделю по тренду
         </p>
       )}
 

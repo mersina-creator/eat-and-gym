@@ -2274,7 +2274,7 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 
   &__chart {
     position: relative;
-    padding: 4px 42px 4px 0;
+    padding: 6px 8px;
     border-radius: var(--ds-radius-lg);
     background: var(--ds-bg-elevated);
     color: var(--ds-blue);
@@ -2283,6 +2283,22 @@ body:has(.tablebar:not([hidden])) .sitefoot {
   }
 
   &__dot { fill: var(--ds-blue); }
+
+  &__grid {
+    stroke: var(--ds-fill-4);
+    stroke-width: 0.6;
+  }
+
+  &__tick {
+    fill: var(--ds-label-secondary);
+    font-size: 7px;
+  }
+
+  &__unit {
+    fill: var(--ds-label-secondary);
+    font-size: 7px;
+    font-weight: 600;
+  }
 
   &__scale {
     position: absolute;
