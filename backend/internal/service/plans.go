@@ -30,6 +30,7 @@ type Plans struct {
 	catalog     *planner.CatalogRef
 	collections *Collections
 	cart        CartLinker // корзина сети ссылкой (ВкусВилл); nil — не подключена
+	profiles    *Profiles  // норма калорий из профиля (ФТ-01); nil — не подключён
 }
 
 // Create собирает план по ответам квиза. Нелюбимые рецепты берутся только из аккаунта,
@@ -47,6 +48,10 @@ func (p *Plans) Create(ctx context.Context, params planner.Params, lang i18n.Lan
 		params.Liked, params.Meh, banned = p.social.Taste(ctx, user.ID)
 		params.ExcludeRecipes = append(params.ExcludeRecipes, banned...)
 		ownerID = &user.ID
+		// ФТ-01: своя норма не вписана в анкете — берём рассчитанную по профилю
+		if params.KcalTarget == 0 && p.profiles != nil {
+			params.KcalTarget = p.profiles.KcalTarget(ctx, user.ID)
+		}
 	}
 	if params.Collection != "" && p.collections != nil {
 		uid := ""

@@ -1,0 +1,15 @@
+# Unraid: данные в appdata, а не в docker.img — их видит бэкап.
+# Postgres — на кэш-пуле напрямую (/mnt/cache), минуя FUSE-слой /mnt/user.
+services:
+  db:
+    volumes:
+      - /mnt/cache/appdata/eat_and_gym/pg:/var/lib/postgresql/data
+  backend:
+    volumes:
+      - /mnt/user/appdata/eat_and_gym/geo:/geo
+  minio:
+    # MinIO закрыл анонимные пуллы в сентябре 2026 (Docker Hub 11.09, quay.io 24.09).
+    # chainguard/minio — совместимый образ, uid 65532.
+    image: chainguard/minio:latest
+    volumes:
+      - /mnt/user/appdata/eat_and_gym/minio:/data

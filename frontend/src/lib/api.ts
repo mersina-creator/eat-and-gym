@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer, ProfileTargets, UserProfile } from "./types";
 import { getLang, tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -190,6 +190,9 @@ export const api = {
   pushKey: () => request<{ key: string }>("/api/push/key"),
   pushSubscribe: (body: { endpoint: string; p256dh: string; auth: string }) => request<void>("/api/me/push", { method: "POST", body: JSON.stringify(body) }),
   pushUnsubscribe: (endpoint: string) => request<void>("/api/me/push", { method: "DELETE", body: JSON.stringify({ endpoint }) }),
+  // ФТ-01: профиль и норма калорий/БЖУ; null — профиль ещё не заполнен
+  profile: () => request<{ profile: UserProfile; targets: ProfileTargets } | null>("/api/me/profile"),
+  saveProfile: (p: UserProfile) => request<{ profile: UserProfile; targets: ProfileTargets }>("/api/me/profile", { method: "PUT", body: JSON.stringify(p) }),
   notify: () => request<{ settings: NotifySettings; devices: number }>("/api/me/notify"),
   setNotify: (s: NotifySettings) => request<void>("/api/me/notify", { method: "PUT", body: JSON.stringify(s) }),
   notifyTest: () => request<void>("/api/me/notify/test", { method: "POST" }),

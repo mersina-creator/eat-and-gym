@@ -10,7 +10,6 @@ import { BudgetChart } from "../components/BudgetChart";
 import { PurchaseReceipts } from "../components/PurchaseReceipts";
 import { CollectionsPanel } from "../components/CollectionsPanel";
 import { TranslationLine } from "../components/TranslationStatus";
-import { ProfileCard } from "../components/ProfileCard";
 import { PhotoField } from "../components/PhotoField";
 import { useConfirm } from "../components/Confirm";
 import { NotifyCard } from "../components/NotifyCard";
@@ -26,7 +25,7 @@ import type { Family, Favorite, Meta, OwnRecipe, PlanSummary, Purchase } from ".
 import { slotLabel } from "../lib/types";
 import { langCountry, useT } from "../i18n";
 
-type Tab = "plans" | "family" | "recipes" | "purchases" | "profile";
+type Tab = "plans" | "family" | "recipes" | "purchases";
 
 export function Account() {
   const { user, admin, loading, setUser } = useAuth();
@@ -34,7 +33,7 @@ export function Account() {
   const nav = useNavigate();
   // вкладка в адресе (?tab=family): «назад» и обновление возвращают туда же
   const [sp, setSp] = useSearchParams();
-  const TABS: Tab[] = ["plans", "family", "recipes", "purchases", "profile"];
+  const TABS: Tab[] = ["plans", "family", "recipes", "purchases"];
   const tab: Tab = TABS.includes(sp.get("tab") as Tab) ? (sp.get("tab") as Tab) : "plans";
   const setTab = (next: Tab) => setSp((prev) => { const n = new URLSearchParams(prev); if (next === "plans") n.delete("tab"); else n.set("tab", next); return n; });
   const [plans, setPlans] = useState<PlanSummary[] | null>(null);
@@ -189,10 +188,6 @@ export function Account() {
           <button type="button" role="tab" aria-selected={tab === "purchases"} aria-checked={tab === "purchases"} onClick={() => setTab("purchases")}>
             <ShoppingBag size={16} aria-hidden /> <span className="tab-long">{t("account.purchases")}</span>
             <span className="tab-short">{t("account.purchases.short")}</span>
-          </button>
-          <button type="button" role="tab" aria-selected={tab === "profile"} aria-checked={tab === "profile"} onClick={() => setTab("profile")}>
-            <Activity size={16} aria-hidden /> <span className="tab-long">Профиль</span>
-            <span className="tab-short">Профиль</span>
           </button>
         </div>
 
@@ -369,12 +364,6 @@ export function Account() {
             ))}
               </>
             )}
-          </section>
-        )}
-
-        {tab === "profile" && (
-          <section aria-label="Профиль" className="account__section">
-            <ProfileCard />
           </section>
         )}
 

@@ -127,6 +127,7 @@ type Repos struct {
 	Partners    PartnerRepo
 	Offers      OfferRepo
 	APIKeys     APIKeyRepo
+	Profiles    ProfileRepo
 }
 
 // Services — набор сценариев; транспорт получает его целиком.
@@ -153,6 +154,7 @@ type Services struct {
 	Ads          *Ads
 	IndexNow     *IndexNow
 	APIKeys      *APIKeys
+	Profiles     *Profiles // ФТ-01: профиль и норма калорий/БЖУ
 	Bots         *Bots // nil-безопасен: без токенов ботов кнопок «список в мессенджере» нет
 }
 
@@ -161,9 +163,10 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 	recipes := &Recipes{repo: repos.UserRecipes, users: repos.Users, catalog: catalog}
 	social := &Social{repo: repos.Social, recipes: recipes}
 	family := &Family{repo: repos.Households}
+	profiles := NewProfiles(repos.Profiles)
 	return &Services{
 		Accounts:    &Accounts{users: repos.Users, resets: repos.Resets, sessions: repos.Sessions, plans: repos.Plans, dislikes: repos.Dislikes, purchases: repos.Purchases, catalog: catalog, baseURL: strings.TrimRight(baseURL, "/")},
-		Plans:       &Plans{plans: repos.Plans, checks: repos.Checks, purchases: repos.Purchases, extras: repos.Extras, dislikes: repos.Dislikes, members: repos.PlanMembers, recipes: recipes, social: social, family: family, catalog: catalog, collections: NewCollections(repos.Collections, recipes)},
+		Plans:       &Plans{plans: repos.Plans, checks: repos.Checks, purchases: repos.Purchases, extras: repos.Extras, dislikes: repos.Dislikes, members: repos.PlanMembers, recipes: recipes, social: social, family: family, catalog: catalog, collections: NewCollections(repos.Collections, recipes), profiles: profiles},
 		Recipes:     recipes,
 		Catalog:     &Catalog{catalog: catalog},
 		Events:      &Events{repo: repos.Events},
@@ -177,5 +180,6 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		IndexNow:    NewIndexNow(repos.Settings, baseURL, zap.L().Named("indexnow")),
 		APIKeys:     NewAPIKeys(repos.APIKeys),
 		AI:          NewAssistant(nil),
+		Profiles:    profiles,
 	}
 }

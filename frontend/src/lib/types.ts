@@ -311,3 +311,33 @@ export type ApiKey = { id: string; name: string; prefix: string; createdAt: stri
 
 // Корзина сети ссылкой: что положили и что осталось искать по ссылкам на поиск.
 export type StoreCart = { link: string; added: number; matched: number; wanted: number; left: string[] };
+
+// ФТ-01: профиль и рассчитанная норма (см. backend/internal/nutrition)
+export interface UserProfile {
+  sex: "m" | "f";
+  birthDate: string;
+  heightCm: number;
+  weightKg: number;
+  bodyFatPct?: number;
+  activity: string;
+  goal: string;
+  pace: string;
+  updatedAt?: string;
+}
+
+export interface ProfileTargets {
+  method: "mifflin" | "cunningham";
+  age: number;
+  bmi: number;
+  leanMassKg?: number;
+  rmr: number;
+  tdee: number;
+  kcal: number;
+  proteinG: number;
+  fatG: number;
+  carbsG: number;
+  shiftPct: number;
+  weeklyKg: number;
+  floorApplied: boolean;
+  notes?: string[];
+}
