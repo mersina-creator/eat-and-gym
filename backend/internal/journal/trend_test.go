@@ -114,10 +114,10 @@ func TestRatePerWeek(t *testing.T) {
 	}
 }
 
-func TestRateNeedsTwoPoints(t *testing.T) {
-	p := Trend(ms("2026-10-01", 100.0), d("2026-10-01"), d("2026-10-01"))
+func TestRateNeedsFourPoints(t *testing.T) {
+	p := Trend(ms("2026-10-01", 100.0, "2026-10-02", 99.0, "2026-10-03", 98.0), d("2026-10-01"), d("2026-10-03"))
 	if _, ok := RatePerWeek(p); ok {
-		t.Error("по одному замеру скорость считаться не должна")
+		t.Error("по трём замерам скорость считаться не должна: это экстраполяция шума")
 	}
 }
 
@@ -142,23 +142,24 @@ func TestCoverageIgnoresOutside(t *testing.T) {
 	}
 }
 
+// Условия по весу. Полный набор условий, включая еду, проверяет TestReadyNeedsFoodAndWeight.
 func TestReadyToAdapt(t *testing.T) {
-	ok, why := ReadyToAdapt(Coverage{Days: 14, WeighIns: 6, FreshDay: 1})
+	ok, why := ReadyToAdapt(Coverage{Days: 14, WeighIns: 6, DaysWithFood: 12, FreshDay: 1})
 	if !ok || len(why) != 0 {
 		t.Errorf("должно быть готово, получили %v %v", ok, why)
 	}
 
-	ok, why = ReadyToAdapt(Coverage{Days: 14, WeighIns: 2, FreshDay: 1})
+	ok, why = ReadyToAdapt(Coverage{Days: 14, WeighIns: 2, DaysWithFood: 12, FreshDay: 1})
 	if ok || len(why) != 1 || why[0] != "few_weighins" {
 		t.Errorf("мало замеров: ждём few_weighins, получили %v %v", ok, why)
 	}
 
-	ok, why = ReadyToAdapt(Coverage{Days: 14, WeighIns: 6, FreshDay: 9})
+	ok, why = ReadyToAdapt(Coverage{Days: 14, WeighIns: 6, DaysWithFood: 12, FreshDay: 9})
 	if ok || len(why) != 1 || why[0] != "stale_weighin" {
 		t.Errorf("старый замер: ждём stale_weighin, получили %v %v", ok, why)
 	}
 
-	if ok, _ := ReadyToAdapt(Coverage{Days: 14, WeighIns: 0, FreshDay: -1}); ok {
+	if ok, _ := ReadyToAdapt(Coverage{Days: 14, WeighIns: 0, DaysWithFood: 0, FreshDay: -1}); ok {
 		t.Error("без замеров пересчёт включаться не должен")
 	}
 }

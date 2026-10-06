@@ -81,19 +81,22 @@ func Trend(ms []Measurement, from, to time.Time) []Point {
 
 // RatePerWeek — скорость изменения веса в кг в неделю по линии тренда за окно.
 // Считается по краям окна, а не по замерам: тренд уже сглажен, и этого достаточно.
-// Меньше двух дней с трендом — скорости нет (0, false).
+// Меньше четырёх точек с трендом — скорости нет (0, false): на двух замерах разница
+// за один день, растянутая на неделю, даёт цифру вроде −3,5 кг, которой не существует.
 func RatePerWeek(points []Point) (float64, bool) {
 	var first, last *Point
+	n := 0
 	for i := range points {
 		if points[i].Trend == 0 {
 			continue
 		}
+		n++
 		if first == nil {
 			first = &points[i]
 		}
 		last = &points[i]
 	}
-	if first == nil || last == nil || first == last {
+	if first == nil || last == nil || first == last || n < 4 {
 		return 0, false
 	}
 	days := last.Date.Sub(first.Date).Hours() / 24
@@ -106,9 +109,10 @@ func RatePerWeek(points []Point) (float64, bool) {
 // Coverage — сколько дней окна покрыто данными. Нужен фазе 2: пересчитывать норму
 // по неполным данным нельзя, ошибка на 300 ккал превращается в полкило в месяц мимо цели.
 type Coverage struct {
-	Days     int `json:"days"`     // длина окна
-	WeighIns int `json:"weighIns"` // дней с замером веса
-	FreshDay int `json:"freshDay"` // сколько дней назад последний замер; -1 — замеров нет
+	Days         int `json:"days"`         // длина окна
+	WeighIns     int `json:"weighIns"`     // дней с замером веса
+	DaysWithFood int `json:"daysWithFood"` // дней с записью в журнале еды
+	FreshDay     int `json:"freshDay"`     // сколько дней назад последний замер; -1 — замеров нет
 }
 
 // Cover считает покрытие замерами веса за окно [from, to] включительно.
@@ -137,15 +141,26 @@ func Cover(ms []Measurement, from, to time.Time) Coverage {
 	return c
 }
 
+// Пороги пересчёта нормы по окну в 14 дней.
+const (
+	MinWeighIns = 4  // замеров веса
+	MinFoodDays = 10 // дней с записью о еде
+	MaxStaleDay = 3  // давность последнего замера
+)
+
 // ReadyToAdapt отвечает на единственный вопрос фазы 2: можно ли пересчитывать норму.
-// Пороги по окну в 14 дней: не меньше 4 замеров и хотя бы один за последние 3 дня.
-// Если нет — возвращает коды причин, чтобы интерфейс показал, чего не хватает, а не молчал.
+// Нужны обе стороны уравнения — и вес, и съеденное: без веса не видно результата,
+// без еды нечего сопоставлять. Если чего-то нет, возвращает коды причин,
+// чтобы интерфейс показал, чего не хватает, а не молчал.
 func ReadyToAdapt(c Coverage) (bool, []string) {
 	var why []string
-	if c.WeighIns < 4 {
+	if c.DaysWithFood*14 < MinFoodDays*max(c.Days, 1) {
+		why = append(why, "few_days")
+	}
+	if c.WeighIns < MinWeighIns {
 		why = append(why, "few_weighins")
 	}
-	if c.FreshDay < 0 || c.FreshDay > 3 {
+	if c.FreshDay < 0 || c.FreshDay > MaxStaleDay {
 		why = append(why, "stale_weighin")
 	}
 	return len(why) == 0, why
