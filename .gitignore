@@ -31,3 +31,5 @@ __pycache__/
 frontend/.impeccable/hook.cache.json
 /todo/
 .secrets/
+*.bak
+*.bak2
