@@ -132,7 +132,7 @@ func main() {
 	services := service.New(service.Repos{
 		Users: store.Users, Resets: store.Resets, Sessions: store.Sessions, Plans: store.Plans, Dislikes: store.Dislikes, Checks: store.Checks,
 		Purchases: store.Purchases, Extras: store.Extras, UserRecipes: store.UserRecipes, Events: store.Events,
-		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections, Partners: store.Partners, Offers: store.Offers, APIKeys: store.APIKeys, Profiles: store.Profiles,
+		PlanMembers: store.PlanMembers, Push: store.Push, Settings: store.Settings, Social: store.Social, Households: store.Households, Admin: store.Admin, Collections: store.Collections, Partners: store.Partners, Offers: store.Offers, APIKeys: store.APIKeys, Profiles: store.Profiles, Journal: store.Journal,
 	}, catalogRef, cfg.PushContact, cfg.BaseURL)
 	services.Admin = service.NewAdmin(store.Admin, store.Users, cfg.AdminEmails)
 	// письма: восстановление пароля; без MAIL_HOST письмо только в логе (локальный стенд)

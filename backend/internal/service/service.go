@@ -128,6 +128,7 @@ type Repos struct {
 	Offers      OfferRepo
 	APIKeys     APIKeyRepo
 	Profiles    ProfileRepo
+	Journal     JournalRepo
 }
 
 // Services — набор сценариев; транспорт получает его целиком.
@@ -155,6 +156,7 @@ type Services struct {
 	IndexNow     *IndexNow
 	APIKeys      *APIKeys
 	Profiles     *Profiles // ФТ-01: профиль и норма калорий/БЖУ
+	Journal      *Journal  // ФТ-05: журнал веса
 	Bots         *Bots // nil-безопасен: без токенов ботов кнопок «список в мессенджере» нет
 }
 
@@ -181,5 +183,6 @@ func New(repos Repos, catalog *planner.CatalogRef, subscriber, baseURL string) *
 		APIKeys:     NewAPIKeys(repos.APIKeys),
 		AI:          NewAssistant(nil),
 		Profiles:    profiles,
+		Journal:     NewJournal(repos.Journal),
 	}
 }

@@ -2252,3 +2252,61 @@ body:has(.tablebar:not([hidden])) .sitefoot {
 @media (max-width: 480px) {
   .targets__macros { grid-template-columns: 1fr; gap: 8px; }
 }
+
+/* ФТ-05: журнал веса */
+.weight {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--ds-fill-4);
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+
+    h3 { margin: 0; font-size: 17px; }
+  }
+
+  &__last { font-size: 13px; color: var(--ds-label-secondary); }
+
+  &__chart {
+    position: relative;
+    padding: 4px 42px 4px 0;
+    border-radius: var(--ds-radius-lg);
+    background: var(--ds-bg-elevated);
+    color: var(--ds-blue);
+
+    svg { display: block; width: 100%; height: auto; }
+  }
+
+  &__dot { fill: var(--ds-blue); }
+
+  &__scale {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--ds-label-secondary);
+  }
+
+  &__rate { margin: 0; font-size: 15px; font-weight: 600; }
+
+  &__form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .form-control { flex: 1 1 110px; min-width: 0; }
+  }
+
+  &__cover { margin: 0; font-size: 13px; color: var(--ds-label-secondary); }
+
+  &__import { display: grid; gap: 8px; }
+}

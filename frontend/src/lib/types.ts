@@ -341,3 +341,27 @@ export interface ProfileTargets {
   floorApplied: boolean;
   notes?: string[];
 }
+
+// ФТ-05: журнал веса (см. backend/internal/journal)
+export interface WeightPoint {
+  date: string;
+  weight?: number;
+  trend?: number;
+}
+
+export interface WeightCoverage {
+  days: number;
+  weighIns: number;
+  freshDay: number;
+}
+
+export interface WeightView {
+  from: string;
+  to: string;
+  points: WeightPoint[];
+  last?: { date: string; kg: number; note?: string };
+  ratePerWeek?: number;
+  coverage: WeightCoverage;
+  ready: boolean;
+  blockers?: string[];
+}

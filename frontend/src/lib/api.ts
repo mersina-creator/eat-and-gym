@@ -1,4 +1,4 @@
-import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer, ProfileTargets, UserProfile } from "./types";
+import type { AdminError, AdminLog, AdminOverview, AdminRecipe, AdminUser, Collection, OccasionView, SubRow, CatalogRecipeInput, ModerationItem, BudgetReport, Child, Comment, Extra, Family, Favorite, Member, IngredientRef, Meta, NotifySettings, RecipeStats, OwnRecipe, OwnRecipeInput, Params, Plan, PlanSummary, Purchase, Recipe, StoreCart, User, TranslationStatus, Partner, PartnerView, ApiKey, Offer, ProfileTargets, UserProfile, WeightView } from "./types";
 import { getLang, tStatic } from "../i18n";
 
 export class ApiError extends Error {
@@ -193,6 +193,14 @@ export const api = {
   // ФТ-01: профиль и норма калорий/БЖУ; null — профиль ещё не заполнен
   profile: () => request<{ profile: UserProfile; targets: ProfileTargets } | null>("/api/me/profile"),
   saveProfile: (p: UserProfile) => request<{ profile: UserProfile; targets: ProfileTargets }>("/api/me/profile", { method: "PUT", body: JSON.stringify(p) }),
+  // ФТ-05: журнал веса
+  weightJournal: (days: number, today: string) => request<WeightView>(`/api/me/journal/weight?days=${days}&today=${today}`),
+  setWeight: (date: string, kg: number, today: string) =>
+    request<WeightView>(`/api/me/weight/${date}`, { method: "PUT", body: JSON.stringify({ kg, today }) }),
+  deleteWeight: (date: string, today: string) =>
+    request<WeightView>(`/api/me/weight/${date}?today=${today}`, { method: "DELETE" }),
+  importWeight: (text: string, today: string) =>
+    request<{ result: { added: number; errors?: string[] }; view: WeightView }>("/api/me/weight/import", { method: "POST", body: JSON.stringify({ text, today }) }),
   notify: () => request<{ settings: NotifySettings; devices: number }>("/api/me/notify"),
   setNotify: (s: NotifySettings) => request<void>("/api/me/notify", { method: "PUT", body: JSON.stringify(s) }),
   notifyTest: () => request<void>("/api/me/notify/test", { method: "POST" }),

@@ -11,6 +11,7 @@ import { PurchaseReceipts } from "../components/PurchaseReceipts";
 import { CollectionsPanel } from "../components/CollectionsPanel";
 import { TranslationLine } from "../components/TranslationStatus";
 import { ProfileCard } from "../components/ProfileCard";
+import { WeightCard } from "../components/WeightCard";
 import { PhotoField } from "../components/PhotoField";
 import { useConfirm } from "../components/Confirm";
 import { NotifyCard } from "../components/NotifyCard";
@@ -375,6 +376,7 @@ export function Account() {
         {tab === "profile" && (
           <section aria-label="Профиль" className="account__section">
             <ProfileCard />
+            <WeightCard />
           </section>
         )}
 

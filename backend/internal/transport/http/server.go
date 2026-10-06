@@ -245,6 +245,11 @@ func New(d Deps) http.Handler {
 	// ФТ-01: профиль и норма калорий/БЖУ
 	mux.HandleFunc("GET /api/me/profile", s.getProfile)
 	mux.HandleFunc("PUT /api/me/profile", s.limited(s.lim.write, s.putProfile))
+	// ФТ-05: журнал веса
+	mux.HandleFunc("GET /api/me/journal/weight", s.weightJournal)
+	mux.HandleFunc("PUT /api/me/weight/{date}", s.limited(s.lim.write, s.setWeight))
+	mux.HandleFunc("DELETE /api/me/weight/{date}", s.limited(s.lim.write, s.deleteWeight))
+	mux.HandleFunc("POST /api/me/weight/import", s.limited(s.lim.write, s.importWeight))
 	mux.HandleFunc("GET /api/me/notify", s.notifySettings)
 	mux.HandleFunc("PUT /api/me/notify", s.limited(s.lim.write, s.setNotifySettings))
 	mux.HandleFunc("POST /api/me/notify/test", s.limited(s.lim.auth, s.notifyTest))
